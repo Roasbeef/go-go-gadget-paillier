@@ -1,5 +1,5 @@
 # go-go-gadget-paillier
-A Go implementation of the partially homomorphic Paillier Cryptosystem.
+A Go implementation of the partially homomorphic [Paillier Cryptosystem](http://en.wikipedia.org/wiki/Paillier_cryptosystem).
 
 ![Inspector Paillier](https://raw.githubusercontent.com/Roasbeef/go-go-gadget-paillier/master/imgs/Inspector-gadget.jpg?token=AA87LnAHpds9_MUKhbsCKXhn-u47CkJ4ks5U6_XvwA%3D%3D "Inspector Paillier")
 
@@ -17,41 +17,41 @@ The **Paillier Cryptosystem** is an additive cryptosystem. This means that given
 ## Example Usage
 ```go
 
-        // Generate a 128-bit private key.
-        privKey, _ := paillier.GenerateKey(rand.Reader, 128)
+// Generate a 128-bit private key.
+privKey, _ := paillier.GenerateKey(rand.Reader, 128)
 
-        // Encrypt the number "15".
-        m15 := new(big.Int).SetInt64(15)
-        c15, _ := paillier.Encrypt(&privKey.PublicKey, m15.Bytes())
+// Encrypt the number "15".
+m15 := new(big.Int).SetInt64(15)
+c15, _ := paillier.Encrypt(&privKey.PublicKey, m15.Bytes())
 
-        // Decrypt the number "15".
-        d, _ := paillier.Decrypt(privKey, c15)
-        plainText := new(big.Int).SetBytes(d)
-        fmt.Println("Decryption Result of 15: ", plainText.String()) // 15
+// Decrypt the number "15".
+d, _ := paillier.Decrypt(privKey, c15)
+plainText := new(big.Int).SetBytes(d)
+fmt.Println("Decryption Result of 15: ", plainText.String()) // 15
 
-        // Now for the fun stuff.
+// Now for the fun stuff.
         
-        // Encrypt the number "20".
-        m20 := new(big.Int).SetInt64(20)
-        c20, _ := paillier.Encrypt(&privKey.PublicKey, m20.Bytes())
+// Encrypt the number "20".
+m20 := new(big.Int).SetInt64(20)
+c20, _ := paillier.Encrypt(&privKey.PublicKey, m20.Bytes())
 
-        // Add the encrypted integers 15 and 20 together.
-        plusM16M20 := paillier.AddCipher(&privKey.PublicKey, c15, c20)
-        decryptedAddition, _ := paillier.Decrypt(privKey, plusM16M20)
-        fmt.Println("Result of 15+20 after decryption: ",
-                new(big.Int).SetBytes(decryptedAddition).String()) // 35!
+// Add the encrypted integers 15 and 20 together.
+plusM16M20 := paillier.AddCipher(&privKey.PublicKey, c15, c20)
+decryptedAddition, _ := paillier.Decrypt(privKey, plusM16M20)
+fmt.Println("Result of 15+20 after decryption: ",
+        new(big.Int).SetBytes(decryptedAddition).String()) // 35!
 
-        // Add the encrypted integer 15 to plaintext constant 10.
-        plusE15and10 := paillier.Add(&privKey.PublicKey, c15, new(big.Int).SetInt64(10).Bytes())
-        decryptedAddition, _ = paillier.Decrypt(privKey, plusE15and10)
-        fmt.Println("Result of 15+10 after decryption: ",
-                new(big.Int).SetBytes(decryptedAddition).String()) // 25!
+// Add the encrypted integer 15 to plaintext constant 10.
+plusE15and10 := paillier.Add(&privKey.PublicKey, c15, new(big.Int).SetInt64(10).Bytes())
+decryptedAddition, _ = paillier.Decrypt(privKey, plusE15and10)
+fmt.Println("Result of 15+10 after decryption: ",
+        new(big.Int).SetBytes(decryptedAddition).String()) // 25!
 
-        // Multiply the encrypted integer 15 by the plaintext constant 10.
-        mulE15and10 := paillier.Mul(&privKey.PublicKey, c15, new(big.Int).SetInt64(10).Bytes())
-        decryptedMul, _ := paillier.Decrypt(privKey, mulE15and10)
-        fmt.Println("Result of 15*10 after decryption: ",
-                new(big.Int).SetBytes(decryptedMul).String()) // 150!
+// Multiply the encrypted integer 15 by the plaintext constant 10.
+mulE15and10 := paillier.Mul(&privKey.PublicKey, c15, new(big.Int).SetInt64(10).Bytes())
+decryptedMul, _ := paillier.Decrypt(privKey, mulE15and10)
+fmt.Println("Result of 15*10 after decryption: ",
+        new(big.Int).SetBytes(decryptedMul).String()) // 150!
 ```
 
 ## Insallation
