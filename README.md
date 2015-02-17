@@ -12,7 +12,10 @@ However, most FHE systems are to efficiently for practical use, and are an on-go
 
 Instead, this package contains an implementation of a *Partially* Homomorphic Cryptosystem. Partially homomorphic encryption instead only supports a subset of operations on ciphertexts. Examples of such systems are those that support *addition* or *multiplication* on ciphertexts. 
 
-The **Paillier Cryptosystem** is an additive cryptosystem. This means that given two ciphertexts, one can perform operations equivalent to adding the respective plaintexts. Additionally, Paillier Cryptosystem supports further computations. Namely, given an encrypted cipher text, one can *multiply* the cipher text by a given constant, or peform the *addition* of the cipher text and a plaintext constant. 
+The **Paillier Cryptosystem** is an additive cryptosystem. This means that given two ciphertexts, one can perform operations equivalent to adding the respective plaintexts. Additionally, Paillier Cryptosystem supports further computations:
+   * Encrypted integers can be added together
+   * Encrypted integers can be multiplied by an unencrypted integer
+   * Encrypted integers and unencrypted integers can be added together
 
 ## Example Usage
 ```go
