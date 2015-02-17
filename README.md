@@ -8,7 +8,7 @@ A Go implementation of the partially homomorphic [Paillier Cryptosystem](http://
 
 Cryptosystems from this family that support **arbitary** computations are known as *Fully* Homomorphic Cryptosystems (FHE). This powerful property would allows for the creation extremely useful systems whose functionality operates on inputs which are entirely encrypted, subsequently producing encrypted output. With the ability to perform arbitary computation on encrypted data, one could outsource sensitive private data to third-parties who are then able to perform useful operations without ever decrypting the data. Applications of this technology are extremley wide reaching, and could be applied to services such as:  Search Engines, Cloud Computing Providers, E-Mail spam detection, etc. 
 
-However, most FHE systems are to efficiently for practical use, and are an on-going research area in the field of Cryptography. 
+However, most FHE systems are too inefficient for practical use, and are an on-going research area in the field of Cryptography. 
 
 Instead, this package contains an implementation of a *Partially* Homomorphic Cryptosystem. Partially homomorphic encryption instead only supports a subset of operations on ciphertexts. Examples of such systems are those that support *addition* or *multiplication* on ciphertexts. 
 
