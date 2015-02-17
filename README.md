@@ -54,11 +54,11 @@ fmt.Println("Result of 15*10 after decryption: ",
         new(big.Int).SetBytes(decryptedMul).String()) // 150!
 ```
 
-## Insallation
+## Installation
 ```bash
 $ go get github.com/roasbeef/go-go-gadget-paillier
 ```
 
-## Warnning
+## Warning
 This library was created primarily for education purposes, with future application for a course project. You should **NOT USE THIS CODE IN PRODUCTION SYSTEMS**. 
 
