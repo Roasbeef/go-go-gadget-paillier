@@ -63,7 +63,7 @@ type PublicKey struct {
 // Encrypt encrypts a plain text represented as a byte array. The passed plain
 // text MUST NOT be larger than the modulus of the passed public key.
 func Encrypt(pubKey *PublicKey, plainText []byte) ([]byte, error) {
-	r, err := rand.Prime(rand.Reader, pubKey.N.BitLen())
+	r, err := rand.Int(rand.Reader, pubKey.N)
 	if err != nil {
 		return nil, err
 	}
@@ -73,11 +73,11 @@ func Encrypt(pubKey *PublicKey, plainText []byte) ([]byte, error) {
 		return nil, ErrMessageTooLong
 	}
 
-	// c = g^m * r^n mod n^2
+	// c = g^m * r^n mod n^2 = ((m*n+1) mod n^2) * r^n mod n^2
 	n := pubKey.N
 	c := new(big.Int).Mod(
 		new(big.Int).Mul(
-			new(big.Int).Exp(pubKey.G, m, pubKey.NSquared),
+			new(big.Int).Mod(new(big.Int).Add(one, new(big.Int).Mul(m, n)), pubKey.NSquared),
 			new(big.Int).Exp(r, n, pubKey.NSquared),
 		),
 		pubKey.NSquared,
