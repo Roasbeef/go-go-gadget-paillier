@@ -229,6 +229,11 @@ func BenchmarkDecryptionLarge2048(b *testing.B) { benchmarkDecryptionLarge(param
 func BenchmarkDecryptionLarge3072(b *testing.B) { benchmarkDecryptionLarge(params3072, b) }
 func BenchmarkDecryptionLarge4096(b *testing.B) { benchmarkDecryptionLarge(params4096, b) }
 
+func BenchmarkAdditionLarge1024(b *testing.B) { benchmarkAddition(params1024, b) }
+func BenchmarkAdditionLarge2048(b *testing.B) { benchmarkAddition(params2048, b) }
+func BenchmarkAdditionLarge3072(b *testing.B) { benchmarkAddition(params3072, b) }
+func BenchmarkAdditionLarge4096(b *testing.B) { benchmarkAddition(params4096, b) }
+
 func TestPrintParams(t *testing.T) {
 
 	// Generate a 128-bit private key.
