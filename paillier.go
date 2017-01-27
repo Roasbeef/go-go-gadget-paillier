@@ -26,14 +26,9 @@ func GenerateKey(random io.Reader, bits int) (*PrivateKey, error) {
 		return nil, err
 	}
 
-	// n = p * q
 	n := new(big.Int).Mul(p, q)
-
-	// l = phi(n) = (p-1) * q(-1)
-	l := new(big.Int).Mul(
-		new(big.Int).Sub(p, one),
-		new(big.Int).Sub(q, one),
-	)
+	pp := new(big.Int).Mul(p, p)
+	qq := new(big.Int).Mul(q, q)
 
 	return &PrivateKey{
 		PublicKey: PublicKey{
@@ -41,16 +36,33 @@ func GenerateKey(random io.Reader, bits int) (*PrivateKey, error) {
 			NSquared: new(big.Int).Mul(n, n),
 			G:        new(big.Int).Add(n, one), // g = n + 1
 		},
-		L: l,
-		U: new(big.Int).ModInverse(l, n),
+		p:         p,
+		pp:        pp,
+		pminusone: new(big.Int).Sub(p, one),
+		q:         q,
+		qq:        qq,
+		qminusone: new(big.Int).Sub(q, one),
+		pinvq:     new(big.Int).ModInverse(p, q),
+		hp:        h(p, pp, n),
+		hq:        h(q, qq, n),
+		n:         n,
 	}, nil
+
 }
 
 // PrivateKey represents a Paillier key.
 type PrivateKey struct {
 	PublicKey
-	L *big.Int // phi(n), (p-1)*(q-1)
-	U *big.Int // l^-1 mod n
+	p         *big.Int
+	pp        *big.Int
+	pminusone *big.Int
+	q         *big.Int
+	qq        *big.Int
+	qminusone *big.Int
+	pinvq     *big.Int
+	hp        *big.Int
+	hq        *big.Int
+	n         *big.Int
 }
 
 // PublicKey represents the public part of a Paillier key.
@@ -58,6 +70,17 @@ type PublicKey struct {
 	N        *big.Int // modulus
 	G        *big.Int // n+1, since p and q are same length
 	NSquared *big.Int
+}
+
+func h(p *big.Int, pp *big.Int, n *big.Int) *big.Int {
+	gp := new(big.Int).Mod(new(big.Int).Sub(one, n), pp)
+	lp := l(gp, p)
+	hp := new(big.Int).ModInverse(lp, p)
+	return hp
+}
+
+func l(u *big.Int, n *big.Int) *big.Int {
+	return new(big.Int).Div(new(big.Int).Sub(u, one), n)
 }
 
 // Encrypt encrypts a plain text represented as a byte array. The passed plain
@@ -93,23 +116,23 @@ func Decrypt(privKey *PrivateKey, cipherText []byte) ([]byte, error) {
 		return nil, ErrMessageTooLong
 	}
 
-	// c^l mod n^2
-	a := new(big.Int).Exp(c, privKey.L, privKey.NSquared)
+	cp := new(big.Int).Exp(c, privKey.pminusone, privKey.pp)
+	lp := l(cp, privKey.p)
+	mp := new(big.Int).Mod(new(big.Int).Mul(lp, privKey.hp), privKey.p)
+	cq := new(big.Int).Exp(c, privKey.qminusone, privKey.qq)
+	lq := l(cq, privKey.q)
 
-	// L(a)
-	// (a - 1) / n
-	l := new(big.Int).Div(
-		new(big.Int).Sub(a, one),
-		privKey.N,
-	)
-
-	// m = L(c^l mod n^2) * u mod n
-	m := new(big.Int).Mod(
-		new(big.Int).Mul(l, privKey.U),
-		privKey.N,
-	)
+	mqq := new(big.Int).Mul(lq, privKey.hq)
+	mq := new(big.Int).Mod(mqq, privKey.q)
+	m := crt(mp, mq, privKey)
 
 	return m.Bytes(), nil
+}
+
+func crt(mp *big.Int, mq *big.Int, privKey *PrivateKey) *big.Int {
+	u := new(big.Int).Mod(new(big.Int).Mul(new(big.Int).Sub(mq, mp), privKey.pinvq), privKey.q)
+	m := new(big.Int).Add(mp, new(big.Int).Mul(u, privKey.p))
+	return new(big.Int).Mod(m, privKey.n)
 }
 
 // AddCipher homomorphically adds together two cipher texts.
