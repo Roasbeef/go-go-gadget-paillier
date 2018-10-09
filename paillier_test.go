@@ -274,6 +274,7 @@ func params4096() (*PrivateKey, error) {
 }
 
 func benchmarkKey(size int, b *testing.B) {
+	b.ReportAllocs()
 	for n := 0; n < b.N; n++ {
 		GenerateKey(rand.Reader, size)
 	}
@@ -285,6 +286,10 @@ func benchmarkEncryptionSmall(f func() (*PrivateKey, error), b *testing.B) {
 	if err != nil {
 		println("error")
 	}
+
+	b.ReportAllocs()
+	b.ResetTimer()
+
 	for n := 0; n < b.N; n++ {
 		Encrypt(&privKey.PublicKey, m.Bytes())
 	}
@@ -297,6 +302,10 @@ func benchmarkEncryptionLarge(f func() (*PrivateKey, error), b *testing.B) {
 	if err != nil {
 		println("error")
 	}
+
+	b.ReportAllocs()
+	b.ResetTimer()
+
 	for n := 0; n < b.N; n++ {
 		Encrypt(&privKey.PublicKey, m.Bytes())
 	}
@@ -312,6 +321,9 @@ func benchmarkDecryptionSmall(f func() (*PrivateKey, error), b *testing.B) {
 	if err != nil {
 		println("error")
 	}
+
+	b.ReportAllocs()
+	b.ResetTimer()
 
 	for n := 0; n < b.N; n++ {
 		Decrypt(privKey, c)
@@ -329,6 +341,9 @@ func benchmarkDecryptionLarge(f func() (*PrivateKey, error), b *testing.B) {
 	if err != nil {
 		println("error")
 	}
+
+	b.ReportAllocs()
+	b.ResetTimer()
 
 	for n := 0; n < b.N; n++ {
 		Decrypt(privKey, c)
@@ -353,6 +368,9 @@ func benchmarkAddition(f func() (*PrivateKey, error), b *testing.B) {
 	if errs != nil {
 		println("error")
 	}
+
+	b.ReportAllocs()
+	b.ResetTimer()
 
 	for n := 0; n < b.N; n++ {
 		AddCipher(&privKey.PublicKey, c, cs)
