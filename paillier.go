@@ -16,13 +16,23 @@ var ErrMessageTooLong = errors.New("paillier: message too long for Paillier publ
 // GenerateKey generates an Paillier keypair of the given bit size using the
 // random source random (for example, crypto/rand.Reader).
 func GenerateKey(random io.Reader, bits int) (*PrivateKey, error) {
-	p, err := rand.Prime(random, bits/2)
+	// First, begin generation of p in the background.
+	var p *big.Int
+	var errChan = make(chan error, 1)
+	go func() {
+		var err error
+		p, err = rand.Prime(random, bits/2)
+		errChan <- err
+	}()
+
+	// Now, find a prime q in the foreground.
+	q, err := rand.Prime(random, bits/2)
 	if err != nil {
 		return nil, err
 	}
 
-	q, err := rand.Prime(random, bits/2)
-	if err != nil {
+	// Wait for generation of p to complete successfully.
+	if err := <-errChan; err != nil {
 		return nil, err
 	}
 
@@ -86,11 +96,31 @@ func l(u *big.Int, n *big.Int) *big.Int {
 // Encrypt encrypts a plain text represented as a byte array. The passed plain
 // text MUST NOT be larger than the modulus of the passed public key.
 func Encrypt(pubKey *PublicKey, plainText []byte) ([]byte, error) {
+	c, _, err := EncryptAndNonce(pubKey, plainText)
+	return c, err
+}
+
+// EncryptAndNonce encrypts a plain text represented as a byte array, and in
+// addition, returns the nonce used during encryption. The passed plain text
+// MUST NOT be larger than the modulus of the passed public key.
+func EncryptAndNonce(pubKey *PublicKey, plainText []byte) ([]byte, *big.Int, error) {
 	r, err := rand.Int(rand.Reader, pubKey.N)
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 
+	c, err := EncryptWithNonce(pubKey, r, plainText)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	return c.Bytes(), r, nil
+}
+
+// EncryptWithNonce encrypts a plain text represented as a byte array using the
+// provided nonce to perform encryption. The passed plain text MUST NOT be
+// larger than the modulus of the passed public key.
+func EncryptWithNonce(pubKey *PublicKey, r *big.Int, plainText []byte) (*big.Int, error) {
 	m := new(big.Int).SetBytes(plainText)
 	if pubKey.N.Cmp(m) < 1 { // N < m
 		return nil, ErrMessageTooLong
@@ -106,7 +136,7 @@ func Encrypt(pubKey *PublicKey, plainText []byte) ([]byte, error) {
 		pubKey.NSquared,
 	)
 
-	return c.Bytes(), nil
+	return c, nil
 }
 
 // Decrypt decrypts the passed cipher text.

@@ -6,75 +6,6 @@ import (
 	"testing"
 )
 
-/*
-
-	fmt.Println("N :=new(big.Int)")
-	fmt.Print("N.SetString(\"")
-	fmt.Print(key.PublicKey.N)
-	fmt.Println("\", 10)")
-
-	fmt.Println("NSquared :=new(big.Int)")
-	fmt.Print("NSquared.SetString(\"")
-	fmt.Print(key.PublicKey.NSquared)
-	fmt.Println("\", 10)")
-
-	fmt.Println("G :=new(big.Int)")
-	fmt.Print("G.SetString(\"")
-	fmt.Print(key.PublicKey.G)
-	fmt.Println("\", 10)")
-
-	fmt.Println("p :=new(big.Int)")
-	fmt.Print("p.SetString(\"")
-	fmt.Print(key.p)
-	fmt.Println("\", 10)")
-
-	fmt.Println("pp :=new(big.Int)")
-	fmt.Print("pp.SetString(\"")
-	fmt.Print(key.pp)
-	fmt.Println("\", 10)")
-
-	fmt.Println("pminusone :=new(big.Int)")
-	fmt.Print("pminusone.SetString(\"")
-	fmt.Print(key.pminusone)
-	fmt.Println("\", 10)")
-
-	fmt.Println("q :=new(big.Int)")
-	fmt.Print("q.SetString(\"")
-	fmt.Print(key.q)
-	fmt.Println("\", 10)")
-
-	fmt.Println("qq :=new(big.Int)")
-	fmt.Print("qq.SetString(\"")
-	fmt.Print(key.qq)
-	fmt.Println("\", 10)")
-
-	fmt.Println("qminusone :=new(big.Int)")
-	fmt.Print("qminusone.SetString(\"")
-	fmt.Print(key.qminusone)
-	fmt.Println("\", 10)")
-
-	fmt.Println("pinvq :=new(big.Int)")
-	fmt.Print("pinvq.SetString(\"")
-	fmt.Print(key.pinvq)
-	fmt.Println("\", 10)")
-
-	fmt.Println("hp :=new(big.Int)")
-	fmt.Print("hp.SetString(\"")
-	fmt.Print(key.hp)
-	fmt.Println("\", 10)")
-
-	fmt.Println("hq :=new(big.Int)")
-	fmt.Print("hq.SetString(\"")
-	fmt.Print(key.hq)
-	fmt.Println("\", 10)")
-
-	fmt.Println("n :=new(big.Int)")
-	fmt.Print("n.SetString(\"")
-	fmt.Print(key.n)
-	fmt.Println("\", 10)")
-
-*/
-
 func params1024() (*PrivateKey, error) {
 
 	N := new(big.Int)
@@ -274,6 +205,7 @@ func params4096() (*PrivateKey, error) {
 }
 
 func benchmarkKey(size int, b *testing.B) {
+	b.ReportAllocs()
 	for n := 0; n < b.N; n++ {
 		GenerateKey(rand.Reader, size)
 	}
@@ -285,6 +217,10 @@ func benchmarkEncryptionSmall(f func() (*PrivateKey, error), b *testing.B) {
 	if err != nil {
 		println("error")
 	}
+
+	b.ReportAllocs()
+	b.ResetTimer()
+
 	for n := 0; n < b.N; n++ {
 		Encrypt(&privKey.PublicKey, m.Bytes())
 	}
@@ -297,6 +233,10 @@ func benchmarkEncryptionLarge(f func() (*PrivateKey, error), b *testing.B) {
 	if err != nil {
 		println("error")
 	}
+
+	b.ReportAllocs()
+	b.ResetTimer()
+
 	for n := 0; n < b.N; n++ {
 		Encrypt(&privKey.PublicKey, m.Bytes())
 	}
@@ -312,6 +252,9 @@ func benchmarkDecryptionSmall(f func() (*PrivateKey, error), b *testing.B) {
 	if err != nil {
 		println("error")
 	}
+
+	b.ReportAllocs()
+	b.ResetTimer()
 
 	for n := 0; n < b.N; n++ {
 		Decrypt(privKey, c)
@@ -329,6 +272,9 @@ func benchmarkDecryptionLarge(f func() (*PrivateKey, error), b *testing.B) {
 	if err != nil {
 		println("error")
 	}
+
+	b.ReportAllocs()
+	b.ResetTimer()
 
 	for n := 0; n < b.N; n++ {
 		Decrypt(privKey, c)
@@ -353,6 +299,9 @@ func benchmarkAddition(f func() (*PrivateKey, error), b *testing.B) {
 	if errs != nil {
 		println("error")
 	}
+
+	b.ReportAllocs()
+	b.ResetTimer()
 
 	for n := 0; n < b.N; n++ {
 		AddCipher(&privKey.PublicKey, c, cs)
@@ -395,21 +344,21 @@ func TestPrintParams(t *testing.T) {
 	// Generate a 128-bit private key.
 	privKey, err := GenerateKey(rand.Reader, 4092)
 	if err != nil {
-		t.Fatalf("Unable to generate private key: ", err)
+		t.Fatalf("Unable to generate private key: %v", err)
 	}
 
 	// Encrypt the integer 15.
 	m15 := new(big.Int).SetInt64(15)
 	c15, err := Encrypt(&privKey.PublicKey, m15.Bytes())
 	if err != nil {
-		t.Fatalf("Unable to encrypt plain text: ", err)
+		t.Fatalf("Unable to encrypt plain text: %v", err)
 	}
 
 	// Encrypt the integer 20.
 	m20 := new(big.Int).SetInt64(20)
 	c20, err := Encrypt(&privKey.PublicKey, m20.Bytes())
 	if err != nil {
-		t.Fatalf("Unable to encrypt plain text: ", err)
+		t.Fatalf("Unable to encrypt plain text: %v", err)
 	}
 
 	// Now homomorphically add the encrypted integers.
@@ -418,7 +367,7 @@ func TestPrintParams(t *testing.T) {
 	// When decrypted, the result should be 15+20 = 35
 	plaintext, err := Decrypt(privKey, addedCiphers)
 	if err != nil {
-		t.Fatalf("Unable to decrypted cipher text: ", err)
+		t.Fatalf("Unable to decrypted cipher text: %v", err)
 	}
 	decryptedInt := new(big.Int).SetBytes(plaintext)
 	if decryptedInt.Cmp(new(big.Int).SetInt64(35)) != 0 {
@@ -432,20 +381,20 @@ func TestCorrectness(t *testing.T) {
 	// Generate a 128-bit private key.
 	privKey, err := GenerateKey(rand.Reader, 128)
 	if err != nil {
-		t.Fatalf("Unable to generate private key: ", err)
+		t.Fatalf("Unable to generate private key: %v", err)
 	}
 
 	// Encrypt the integer 15.
 	m := new(big.Int).SetInt64(15)
 	c, err := Encrypt(&privKey.PublicKey, m.Bytes())
 	if err != nil {
-		t.Fatalf("Unable to encrypt plain text: ", err)
+		t.Fatalf("Unable to encrypt plain text: %v", err)
 	}
 
 	// Now decrypt the cipher text. Should come back out to 15.
 	d, err := Decrypt(privKey, c)
 	if err != nil {
-		t.Fatalf("Unable to decrypt cipher text: ", err)
+		t.Fatalf("Unable to decrypt cipher text: %v", err)
 	}
 	originalInt := new(big.Int).SetBytes(d)
 	if originalInt.Cmp(m) != 0 { // originalInt != 15
@@ -458,21 +407,21 @@ func TestHomomorphicCipherTextAddition(t *testing.T) {
 	// Generate a 128-bit private key.
 	privKey, err := GenerateKey(rand.Reader, 128)
 	if err != nil {
-		t.Fatalf("Unable to generate private key: ", err)
+		t.Fatalf("Unable to generate private key: %v", err)
 	}
 
 	// Encrypt the integer 15.
 	m15 := new(big.Int).SetInt64(15)
 	c15, err := Encrypt(&privKey.PublicKey, m15.Bytes())
 	if err != nil {
-		t.Fatalf("Unable to encrypt plain text: ", err)
+		t.Fatalf("Unable to encrypt plain text: %v", err)
 	}
 
 	// Encrypt the integer 20.
 	m20 := new(big.Int).SetInt64(20)
 	c20, err := Encrypt(&privKey.PublicKey, m20.Bytes())
 	if err != nil {
-		t.Fatalf("Unable to encrypt plain text: ", err)
+		t.Fatalf("Unable to encrypt plain text: %v", err)
 	}
 
 	// Now homomorphically add the encrypted integers.
@@ -481,7 +430,7 @@ func TestHomomorphicCipherTextAddition(t *testing.T) {
 	// When decrypted, the result should be 15+20 = 35
 	plaintext, err := Decrypt(privKey, addedCiphers)
 	if err != nil {
-		t.Fatalf("Unable to decrypted cipher text: ", err)
+		t.Fatalf("Unable to decrypted cipher text: %v", err)
 	}
 	decryptedInt := new(big.Int).SetBytes(plaintext)
 	if decryptedInt.Cmp(new(big.Int).SetInt64(35)) != 0 {
@@ -494,14 +443,14 @@ func TestHomomorphicConstantAddition(t *testing.T) {
 	// Generate a 128-bit private key.
 	privKey, err := GenerateKey(rand.Reader, 128)
 	if err != nil {
-		t.Fatalf("Unable to generate private key: ", err)
+		t.Fatalf("Unable to generate private key: %v", err)
 	}
 
 	// Encrypt the integer 15.
 	m15 := new(big.Int).SetInt64(15)
 	c15, err := Encrypt(&privKey.PublicKey, m15.Bytes())
 	if err != nil {
-		t.Fatalf("Unable to encrypt plain text: ", err)
+		t.Fatalf("Unable to encrypt plain text: %v", err)
 	}
 
 	// Attempt to add the plaintext constant "10" to our encrypted integer
@@ -510,7 +459,7 @@ func TestHomomorphicConstantAddition(t *testing.T) {
 	encryptedAdd := Add(&privKey.PublicKey, c15, ten.Bytes())
 	plainText, err := Decrypt(privKey, encryptedAdd)
 	if err != nil {
-		t.Fatalf("Unable to decrypt cipher text: ", err)
+		t.Fatalf("Unable to decrypt cipher text: %v", err)
 	}
 	decryptedInt := new(big.Int).SetBytes(plainText)
 
@@ -526,14 +475,14 @@ func TestHomomorphicConstantMultiplication(t *testing.T) {
 	// Generate a 128-bit private key.
 	privKey, err := GenerateKey(rand.Reader, 128)
 	if err != nil {
-		t.Fatalf("Unable to generate private key: ", err)
+		t.Fatalf("Unable to generate private key: %v", err)
 	}
 
 	// Encrypt the integer 15.
 	m15 := new(big.Int).SetInt64(15)
 	c15, err := Encrypt(&privKey.PublicKey, m15.Bytes())
 	if err != nil {
-		t.Fatalf("Unable to encrypt plain text: ", err)
+		t.Fatalf("Unable to encrypt plain text: %v", err)
 	}
 
 	// Attempt to multiply our encrypted integer
@@ -541,7 +490,7 @@ func TestHomomorphicConstantMultiplication(t *testing.T) {
 	encryptedAdd := Mul(&privKey.PublicKey, c15, ten.Bytes())
 	plainText, err := Decrypt(privKey, encryptedAdd)
 	if err != nil {
-		t.Fatalf("Unable to decrypt cipher text: ", err)
+		t.Fatalf("Unable to decrypt cipher text: %v", err)
 	}
 	decryptedInt := new(big.Int).SetBytes(plainText)
 
