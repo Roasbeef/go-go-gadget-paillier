@@ -395,21 +395,21 @@ func TestPrintParams(t *testing.T) {
 	// Generate a 128-bit private key.
 	privKey, err := GenerateKey(rand.Reader, 4092)
 	if err != nil {
-		t.Fatalf("Unable to generate private key: ", err)
+		t.Fatalf("Unable to generate private key: %v", err)
 	}
 
 	// Encrypt the integer 15.
 	m15 := new(big.Int).SetInt64(15)
 	c15, err := Encrypt(&privKey.PublicKey, m15.Bytes())
 	if err != nil {
-		t.Fatalf("Unable to encrypt plain text: ", err)
+		t.Fatalf("Unable to encrypt plain text: %v", err)
 	}
 
 	// Encrypt the integer 20.
 	m20 := new(big.Int).SetInt64(20)
 	c20, err := Encrypt(&privKey.PublicKey, m20.Bytes())
 	if err != nil {
-		t.Fatalf("Unable to encrypt plain text: ", err)
+		t.Fatalf("Unable to encrypt plain text: %v", err)
 	}
 
 	// Now homomorphically add the encrypted integers.
@@ -418,7 +418,7 @@ func TestPrintParams(t *testing.T) {
 	// When decrypted, the result should be 15+20 = 35
 	plaintext, err := Decrypt(privKey, addedCiphers)
 	if err != nil {
-		t.Fatalf("Unable to decrypted cipher text: ", err)
+		t.Fatalf("Unable to decrypted cipher text: %v", err)
 	}
 	decryptedInt := new(big.Int).SetBytes(plaintext)
 	if decryptedInt.Cmp(new(big.Int).SetInt64(35)) != 0 {
@@ -432,20 +432,20 @@ func TestCorrectness(t *testing.T) {
 	// Generate a 128-bit private key.
 	privKey, err := GenerateKey(rand.Reader, 128)
 	if err != nil {
-		t.Fatalf("Unable to generate private key: ", err)
+		t.Fatalf("Unable to generate private key: %v", err)
 	}
 
 	// Encrypt the integer 15.
 	m := new(big.Int).SetInt64(15)
 	c, err := Encrypt(&privKey.PublicKey, m.Bytes())
 	if err != nil {
-		t.Fatalf("Unable to encrypt plain text: ", err)
+		t.Fatalf("Unable to encrypt plain text: %v", err)
 	}
 
 	// Now decrypt the cipher text. Should come back out to 15.
 	d, err := Decrypt(privKey, c)
 	if err != nil {
-		t.Fatalf("Unable to decrypt cipher text: ", err)
+		t.Fatalf("Unable to decrypt cipher text: %v", err)
 	}
 	originalInt := new(big.Int).SetBytes(d)
 	if originalInt.Cmp(m) != 0 { // originalInt != 15
@@ -458,21 +458,21 @@ func TestHomomorphicCipherTextAddition(t *testing.T) {
 	// Generate a 128-bit private key.
 	privKey, err := GenerateKey(rand.Reader, 128)
 	if err != nil {
-		t.Fatalf("Unable to generate private key: ", err)
+		t.Fatalf("Unable to generate private key: %v", err)
 	}
 
 	// Encrypt the integer 15.
 	m15 := new(big.Int).SetInt64(15)
 	c15, err := Encrypt(&privKey.PublicKey, m15.Bytes())
 	if err != nil {
-		t.Fatalf("Unable to encrypt plain text: ", err)
+		t.Fatalf("Unable to encrypt plain text: %v", err)
 	}
 
 	// Encrypt the integer 20.
 	m20 := new(big.Int).SetInt64(20)
 	c20, err := Encrypt(&privKey.PublicKey, m20.Bytes())
 	if err != nil {
-		t.Fatalf("Unable to encrypt plain text: ", err)
+		t.Fatalf("Unable to encrypt plain text: %v", err)
 	}
 
 	// Now homomorphically add the encrypted integers.
@@ -481,7 +481,7 @@ func TestHomomorphicCipherTextAddition(t *testing.T) {
 	// When decrypted, the result should be 15+20 = 35
 	plaintext, err := Decrypt(privKey, addedCiphers)
 	if err != nil {
-		t.Fatalf("Unable to decrypted cipher text: ", err)
+		t.Fatalf("Unable to decrypted cipher text: %v", err)
 	}
 	decryptedInt := new(big.Int).SetBytes(plaintext)
 	if decryptedInt.Cmp(new(big.Int).SetInt64(35)) != 0 {
@@ -494,14 +494,14 @@ func TestHomomorphicConstantAddition(t *testing.T) {
 	// Generate a 128-bit private key.
 	privKey, err := GenerateKey(rand.Reader, 128)
 	if err != nil {
-		t.Fatalf("Unable to generate private key: ", err)
+		t.Fatalf("Unable to generate private key: %v", err)
 	}
 
 	// Encrypt the integer 15.
 	m15 := new(big.Int).SetInt64(15)
 	c15, err := Encrypt(&privKey.PublicKey, m15.Bytes())
 	if err != nil {
-		t.Fatalf("Unable to encrypt plain text: ", err)
+		t.Fatalf("Unable to encrypt plain text: %v", err)
 	}
 
 	// Attempt to add the plaintext constant "10" to our encrypted integer
@@ -510,7 +510,7 @@ func TestHomomorphicConstantAddition(t *testing.T) {
 	encryptedAdd := Add(&privKey.PublicKey, c15, ten.Bytes())
 	plainText, err := Decrypt(privKey, encryptedAdd)
 	if err != nil {
-		t.Fatalf("Unable to decrypt cipher text: ", err)
+		t.Fatalf("Unable to decrypt cipher text: %v", err)
 	}
 	decryptedInt := new(big.Int).SetBytes(plainText)
 
@@ -526,14 +526,14 @@ func TestHomomorphicConstantMultiplication(t *testing.T) {
 	// Generate a 128-bit private key.
 	privKey, err := GenerateKey(rand.Reader, 128)
 	if err != nil {
-		t.Fatalf("Unable to generate private key: ", err)
+		t.Fatalf("Unable to generate private key: %v", err)
 	}
 
 	// Encrypt the integer 15.
 	m15 := new(big.Int).SetInt64(15)
 	c15, err := Encrypt(&privKey.PublicKey, m15.Bytes())
 	if err != nil {
-		t.Fatalf("Unable to encrypt plain text: ", err)
+		t.Fatalf("Unable to encrypt plain text: %v", err)
 	}
 
 	// Attempt to multiply our encrypted integer
@@ -541,7 +541,7 @@ func TestHomomorphicConstantMultiplication(t *testing.T) {
 	encryptedAdd := Mul(&privKey.PublicKey, c15, ten.Bytes())
 	plainText, err := Decrypt(privKey, encryptedAdd)
 	if err != nil {
-		t.Fatalf("Unable to decrypt cipher text: ", err)
+		t.Fatalf("Unable to decrypt cipher text: %v", err)
 	}
 	decryptedInt := new(big.Int).SetBytes(plainText)
 
