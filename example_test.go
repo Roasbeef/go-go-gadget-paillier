@@ -47,8 +47,8 @@ func main() {
 	}
 
 	// Add the encrypted integers 15 and 20 together.
-	plusM16M20 := AddCipher(&privKey.PublicKey, c15, c20)
-	decryptedAddition, err := Decrypt(privKey, plusM16M20)
+	plusM15M20 := AddCipher(&privKey.PublicKey, c15, c20)
+	decryptedAddition, err := Decrypt(privKey, plusM15M20)
 	if err != nil {
 		fmt.Println(err)
 		return
